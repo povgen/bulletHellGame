@@ -1,1 +1,1 @@
-gameLoop.start();
+GameLoop.start();

@@ -1,78 +1,3 @@
-function getRadians(degrees) {
-    return (Math.PI / 180) * degrees;
-}
-function arcctg(x) { return Math.PI / 2 - Math.atan(x); }
-/** Пользовательский ввод мини-либа */
-(function() {
-    var pressedKeys = {};
-
-    function setKey(event, status) {
-        var code = event.keyCode;
-        var key;
-
-        switch(code) {
-            case 82: key = 'R'; break;
-            case 16: key = 'SHIFT'; break;
-            case 17: key = 'CTRL'; break;
-            case 18: key = 'ALT'; break;
-            case 20: key = 'CAPS'; break;
-            case 32: key = 'SPACE'; break;
-            case 37: key = 'LEFT'; break;
-            case 38: key = 'UP'; break;
-            case 39: key = 'RIGHT'; break;
-            case 40: key = 'DOWN'; break;
-            default:
-                // Convert ASCII codes to letters
-                key = String.fromCharCode(code);
-        }
-
-        pressedKeys[key] = status;
-    }
-
-    document.addEventListener('keydown', function(e) {
-        setKey(e, true);
-    });
-
-    document.addEventListener('keyup', function(e) {
-        setKey(e, false);
-    });
-
-    window.addEventListener('blur', function() {
-        pressedKeys = {};
-    });
-
-    window.input = {
-        isDown: function(key) {
-            return pressedKeys[key.toUpperCase()];
-        }
-    };
-})();
-
-var mouseInput = {position : {x:0, y:0}, isClicked : false};
-
-document.addEventListener('mousedown', function(event) {
-    mouseInput.isClicked = true;
-});
-
-document.addEventListener('mouseup', function(event) {
-    mouseInput.isClicked = false;
-});
-
-document.addEventListener('mousemove', function(event) {
-    mouseInput.position.x = event.clientX;
-    mouseInput.position.y = event.clientY;
-});
-
-function getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-function hasCollision(obj1, obj2) {
-
-    return ((obj1.position.x < obj2.position.x && obj2.position.x < (obj1.position.x + obj1.width))
-            && (obj1.position.y < obj2.position.y && obj2.position.y < (obj1.position.y + obj1.height)) )
-        || ((obj2.position.x < obj1.position.x && obj1.position.x < (obj2.position.x + obj2.width))
-            && (obj2.position.y < obj1.position.y && obj1.position.y < (obj2.position.y + obj2.height)) );
-}
 
 /** position 	- начальные координаты снаряда(x,y)
  * 	direction 	- направление выстрела в радинах
@@ -135,11 +60,7 @@ function shootToPlayer(x,y) {
     enemyBullets.push(new Bullet(x, y, dir));
 }
 
-var obj = {
-    position: { x:300, y:300 },
-    height: 100,
-    width: 100,
-}
+
 
 var target = {
     position: { x:1000.0, y:300.0 },
@@ -218,12 +139,32 @@ var frameNum = 0;
 var countShoot = 0;
 var isShooting = true;
 var targetIsMoveUp = false;
+
+
+
+
+
+
+
+var obj = {
+    position: { x:300, y:300 },
+    height: 100,
+    width: 100,
+    color: 'orange',
+}
+
+var objects = [
+    new BaseObject(300, ),
+    new BaseObject(100, 200),
+    new Btn(300, 300)
+]
 function update(dt)
 {
-    if(player.health <= 0) {
-        alert('Game over');
-        location.reload();
-    }
+    objects.forEach(el => el.update());
+    // if(player.health <= 0) {
+    //     alert('Game over');
+    //     location.reload();
+    // }
 
     /** перемещение персонажа */
     if(player.health > 0)
@@ -311,17 +252,8 @@ function update(dt)
             target.position.y += target.speed*dt;
         else
             target.position.y -= target.speed*dt;
-
-
     }
 
-    if (hasCollision(player, obj))
-    {
-        if (target.health <= 0)
-            target.health = 100;
-        //player.health = 100;
-        //player.ammo = 20;
-    }
     if ( frameNum > 60)
         frameNum = 0;
     else
@@ -330,6 +262,8 @@ function update(dt)
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    objects.forEach(el => el.render());
 
     ctx.fillStyle = "orange";
 
@@ -391,23 +325,22 @@ function render() {
 
 /** Игровой цикл */
 /** объект для взаимодействия с игровым циклом */
-class gameLoop {
+class GameLoop {
     static lastTime = Date.now();
-
     static isStop;
 
     static start () {
-        gameLoop.isStop = false;
-        gameLoop.lastTime = Date.now();
+        GameLoop.isStop = false;
+        GameLoop.lastTime = Date.now();
         this.main();
     };
 
     static stop () {
-        gameLoop.isStop = true;
+        GameLoop.isStop = true;
     }
 
     static main() {
-        if (gameLoop.isStop) return;
+        if (GameLoop.isStop) return;
 
         let acceleration = 1;
         if(input.isDown('SPACE')) {
@@ -424,12 +357,12 @@ class gameLoop {
             player.speed =150;
         }
         let now = Date.now();
-        let dt = (now - gameLoop.lastTime) * 0.001*acceleration; //1000.0;
+        let dt = (now - GameLoop.lastTime) * 0.001*acceleration; //1000.0;
         update(dt);
         render();
 
-        gameLoop.lastTime = now;
-        requestAnimationFrame(gameLoop.main);
+        GameLoop.lastTime = now;
+        requestAnimationFrame(GameLoop.main);
     };
 
 }
